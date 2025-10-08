@@ -1,0 +1,83 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-8-jdk
+          sudo apt-get install -y git wget unzip
+
+      - name: Install Android SDK
+        run: |
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip -d $HOME/android-sdk
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
+
+      - name: Set up Android environment
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV >> $GITHUB_PATH
+
+      - name: Accept Android licenses
+        run: |
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+
+      - name: Install Android platform and build tools
+        run: |
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3"
+
+      - name: Install Python dependencies
+        run: |
+          pip install buildozer
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: info-manager-apk
+          path: bin/*.apk
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: bin/*.apk
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: |
+            重要信息管理器 Android APK
+
+            **构建信息:**
+            - 提交: ${{ github.sha }}
+            - 分支: ${{ github.ref }}
+            - 构建时间: ${{ github.event.head_commit.timestamp }}
+
+            **安装说明:**
+            1. 下载APK文件
+            2. 在手机上启用"未知来源"安装
+            3. 安装APK文件
+          draft: false
+          prerelease: false

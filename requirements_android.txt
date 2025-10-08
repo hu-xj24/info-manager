@@ -1,0 +1,9 @@
+# Android版本依赖包
+kivy>=2.1.0
+kivymd>=1.1.0
+plyer>=2.1.0
+buildozer>=1.5.0
+
+# 可选：更好的UI组件
+# kivymd>=1.1.0
+# kivy-garden>=0.1.4

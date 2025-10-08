@@ -1,0 +1,11 @@
+# 重要信息管理器依赖包
+# 使用Python标准库，无需额外安装包
+# tkinter - GUI界面（Python内置）
+# json - 数据存储（Python内置）
+# datetime - 时间处理（Python内置）
+# os - 文件操作（Python内置）
+# threading - 多线程（Python内置）
+
+# 如果需要更高级的功能，可以考虑以下包：
+# pillow>=8.0.0  # 图像处理
+# cryptography>=3.0.0  # 数据加密
