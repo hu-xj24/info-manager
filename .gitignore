@@ -28,6 +28,8 @@ MANIFEST
 # Buildozer
 .bin/
 .buildozer/
+# Keep buildozer.spec for Android builds
+!buildozer.spec
 
 # Android
 bin/
